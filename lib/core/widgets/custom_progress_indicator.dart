@@ -3,11 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class CustomProgressIndicator extends CustomPainter {
-  CustomProgressIndicator(
-      {required this.progress,
-      this.startAngle,
-      this.progressColor,
-      this.emptyColor});
+  CustomProgressIndicator({
+    required this.progress,
+    this.startAngle,
+    this.progressColor,
+    this.emptyColor,
+  });
 
   final double progress;
   double? startAngle;

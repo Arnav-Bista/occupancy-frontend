@@ -87,15 +87,17 @@ class OccupancyEntitiyNotifier
 
   Future<void> refreshData(String from) async {
     state = const AsyncValue.loading();
+    await Future.delayed(const Duration(seconds: 1));
     final fetchedData =
         await ref.read(remoteSourceProvider).getFromData(_name, from);
-    print("FETCHED!");
     if (fetchedData is Left) {
       print(fetchedData.left);
       print("Error :(");
       state = AsyncValue.error(fetchedData.left, StackTrace.current);
       return;
     }
+    // state = AsyncValue.error(500, StackTrace.current);
+    // return;
     final data = fetchedData.right;
     // Protection: This function should only be called when we already have some data.
     // This function should never be called without already having a SUCCESSFUL GET.

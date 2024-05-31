@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:occupancy_frontend/core/entities/status.dart';
+import 'package:occupancy_frontend/core/functions/text_size.dart';
+import 'package:occupancy_frontend/core/widgets/custom_shimmer.dart';
 
 class OccupancyCardSchedule extends StatelessWidget {
   const OccupancyCardSchedule(
@@ -6,71 +9,90 @@ class OccupancyCardSchedule extends StatelessWidget {
       required this.textColor,
       required this.width,
       required this.opening,
-      required this.closing});
+      required this.closing,
+      required this.status});
 
   final Color textColor;
   final double width;
   final int? opening;
   final int? closing;
+  final Status status;
+
+  String convertToTime(int? time) {
+    if (status != Status.success) {
+      return "...";
+    }
+    if (time == null) {
+      return "Closed";
+    }
+    final hour = time ~/ 100;
+    final minute = time % 100;
+    return "$hour:${minute < 10 ? "0$minute" : minute}";
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Should probably look into this
-    // TODO: make it pretty >:(
-    final openingString =
-        "${(opening ?? 0) ~/ 100}:${((opening ?? 0) % 100) == 0 ? "00" : (opening ?? 0) % 100}";
-    final closingString =
-        "${(closing ?? 0) ~/ 100}:${((closing ?? 0) % 100) == 0 ? "00" : (closing ?? 0) % 100}";
-
-    return opening == null
-        ? Row(
-            children: [
-              Text("Closed", style: TextStyle(fontSize: 16, color: textColor)),
-            ],
-          )
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  Text(
-                    "Opens",
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: textColor,
-                        ),
+    final Size textSize =
+        getTextSize("XX:XX", Theme.of(context).textTheme.bodyMedium!);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Column(
+          children: [
+            Text(
+              "Opens",
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: textColor,
                   ),
-                  Text(
-                    openingString,
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: textColor,
-                        ),
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: status == Status.loading
+                  ? CustomShimmer(
+                      height: textSize.height,
+                      width: textSize.width,
+                    )
+                  : Text(
+                      convertToTime(opening),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: textColor,
+                          ),
+                    ),
+            ),
+          ],
+        ),
+        SizedBox(
+          width: width * 0.2,
+          child: Divider(
+            color: textColor,
+            thickness: 2,
+          ),
+        ),
+        Column(
+          children: [
+            Text(
+              "Closes",
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: textColor,
                   ),
-                ],
-              ),
-              SizedBox(
-                width: width * 0.2,
-                child: Divider(
-                  color: textColor,
-                  thickness: 2,
-                ),
-              ),
-              Column(
-                children: [
-                  Text(
-                    "Closes",
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: textColor,
-                        ),
-                  ),
-                  Text(
-                    closingString,
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: textColor,
-                        ),
-                  ),
-                ],
-              ),
-            ],
-          );
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: status == Status.loading
+                  ? CustomShimmer(
+                      height: textSize.height,
+                      width: textSize.width,
+                    )
+                  : Text(
+                      convertToTime(closing),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: textColor,
+                          ),
+                    ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

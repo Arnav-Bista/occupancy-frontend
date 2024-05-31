@@ -50,8 +50,8 @@ class OccupancyScreen extends StatelessWidget {
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
+            icon: Icon(Icons.book),
+            label: "Other Libraries",
           ),
         ],
         currentIndex: 0,

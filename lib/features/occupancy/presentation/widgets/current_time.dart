@@ -71,8 +71,9 @@ class _CurrentTimeTimerState extends State<CurrentTimeTimer> {
 
   @override
   Widget build(BuildContext context) {
+    final String minuteString = minutes < 10 ? "0$minutes" : "$minutes";
     return Text(
-      "$hours:$minutes",
+      "$hours:$minuteString",
       style: Theme.of(context).textTheme.headlineMedium,
     );
   }
