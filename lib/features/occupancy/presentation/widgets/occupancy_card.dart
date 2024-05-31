@@ -71,7 +71,12 @@ class OccupancyCard extends ConsumerWidget {
         status = Status.loading;
       },
       error: (err, stack) {
-        errorCode = err as int;
+        if (err is int) {
+          errorCode = err;
+        } else {
+          print(err);
+          errorCode = 600;
+        }
         status = Status.error;
       },
     );
@@ -158,16 +163,17 @@ class OccupancyCard extends ConsumerWidget {
                                 textColor: textColor,
                               ),
                             Status.loading => Padding(
-                              // Size didnt match...
-                              padding: const EdgeInsets.all(1.3),
-                              child: CustomShimmer(
+                                // Size didnt match...
+                                padding: const EdgeInsets.all(1.3),
+                                child: CustomShimmer(
                                   height: textSize.height,
                                   width: textSize.width,
                                 ),
-                            ),
+                              ),
                             Status.error => Text(
                                 "Error: $errorCode",
-                                style: TextStyle(fontSize: 14, color: textColor),
+                                style:
+                                    TextStyle(fontSize: 14, color: textColor),
                               )
                           },
                         ),
