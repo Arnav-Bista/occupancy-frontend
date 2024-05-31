@@ -89,7 +89,10 @@ class OccupancyEntitiyNotifier
     state = const AsyncValue.loading();
     final fetchedData =
         await ref.read(remoteSourceProvider).getFromData(_name, from);
+    print("FETCHED!");
     if (fetchedData is Left) {
+      print(fetchedData.left);
+      print("Error :(");
       state = AsyncValue.error(fetchedData.left, StackTrace.current);
       return;
     }

@@ -14,7 +14,7 @@ final remoteSourceProvider = Provider<RemoteSource>((ref) {
 class RemoteSource extends OccupancyRepository {
   @override
   Future<Either<int, OccupancyEntity>> getDayData(String name) async {
-    final uri = Uri.https("myoccupancy.uk", "api/day", {"name": name });
+    final uri = Uri.https("myoccupancy.uk", "api/day", {"name": name});
     final response = await http.get(uri);
     if (response.statusCode != 200) {
       return Left(response.statusCode);
@@ -24,15 +24,15 @@ class RemoteSource extends OccupancyRepository {
   }
 
   @override
-  Future<Either<int, OccupancyEntity>> getFromData(String name, String from) async {
-    final uri = Uri.https("myoccupancy.uk", "api/from", {"name": name , "from": from});
+  Future<Either<int, OccupancyEntity>> getFromData(
+      String name, String from) async {
+    final uri =
+        Uri.https("myoccupancy.uk", "api/from", {"name": name, "from": from});
     final response = await http.get(uri);
     if (response.statusCode != 200) {
       return Left(response.statusCode);
     }
     final body = json.decode(response.body);
-    throw UnimplementedError();
+    return Right(OccupancyEntity.fromJson(body));
   }
-
-
 }
