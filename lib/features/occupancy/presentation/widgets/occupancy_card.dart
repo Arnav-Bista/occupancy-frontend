@@ -65,6 +65,9 @@ class OccupancyCard extends ConsumerWidget {
         status = Status.success;
       },
       loading: () {
+        occupancyData = null;
+        occupancy = null;
+        lastUpdated = null;
         status = Status.loading;
       },
       error: (err, stack) {
