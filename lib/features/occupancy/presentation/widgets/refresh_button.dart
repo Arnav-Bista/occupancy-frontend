@@ -29,6 +29,9 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
     ref
         .read(occupancyEntityProvider(widget.dataName).notifier)
         .refreshData(from);
+    setState(() {
+      isEnabled = false;
+    });
   }
 
   @override
@@ -39,6 +42,8 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
 
   @override
   Widget build(BuildContext context) {
+    // Cancel previous timer!
+    timer?.cancel();
     final duration = widget.delay ?? const Duration(minutes: 1);
     int seconds = 0;
     if (widget.lastUpdated != null) {
@@ -61,10 +66,12 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
       onPressed: isEnabled
           ? refreshData
           : () {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(
-                      "Please wait ${duration.inSeconds - seconds} second(s) before refreshing"),
-                  duration: const Duration(milliseconds: 500)));
+              ScaffoldMessenger.of(context)
+                ..removeCurrentSnackBar()
+                ..showSnackBar(SnackBar(
+                    content: Text(
+                        "Please wait ${duration.inSeconds - seconds} second(s) before refreshing"),
+                    duration: const Duration(milliseconds: 800)));
             },
       // onPressed: lastUpdated == null ? null : refreshData,
     );
