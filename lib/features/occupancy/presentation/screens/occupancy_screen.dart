@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:occupancy_frontend/constants.dart';
+import 'package:occupancy_frontend/features/occupancy/presentation/widgets/current_time.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/occupancy_card.dart';
 
 class OccupancyScreen extends StatelessWidget {
@@ -20,6 +21,7 @@ class OccupancyScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                const CurrentTime(),
                 OccupancyCard(
                   width: constraints.maxWidth * 0.7,
                   progressHeight: constraints.maxHeight * 0.3,
@@ -30,12 +32,12 @@ class OccupancyScreen extends StatelessWidget {
                 OccupancyCard(
                   width: constraints.maxWidth * 0.7,
                   progressHeight: constraints.maxHeight * 0.3,
-                  cardColor: const Color(0xFF660033),
+                  cardColor: const Color(ConstantColors.burgundy),
                   progressColor: const Color(0XFFFFD6BA),
                   emptyColor: Colors.grey[500]!,
                   displayName: "Main Library",
                   dataName: "main_library",
-                )
+                ),
               ],
             ),
           );

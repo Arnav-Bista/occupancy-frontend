@@ -17,8 +17,10 @@ class OccupancyCardSchedule extends StatelessWidget {
   Widget build(BuildContext context) {
     // Should probably look into this
     // TODO: make it pretty >:(
-    final openingString = "${(opening ?? 0) ~/ 100}:${((opening ?? 0) % 100) == 0 ? "00" : (opening ?? 0) % 100}";
-    final closingString = "${(closing ?? 0) ~/ 100}:${((closing ?? 0) % 100) == 0 ? "00" : (closing ?? 0) % 100}";
+    final openingString =
+        "${(opening ?? 0) ~/ 100}:${((opening ?? 0) % 100) == 0 ? "00" : (opening ?? 0) % 100}";
+    final closingString =
+        "${(closing ?? 0) ~/ 100}:${((closing ?? 0) % 100) == 0 ? "00" : (closing ?? 0) % 100}";
 
     return opening == null
         ? Row(
@@ -33,11 +35,15 @@ class OccupancyCardSchedule extends StatelessWidget {
                 children: [
                   Text(
                     "Opens",
-                    style: TextStyle(fontSize: 16, color: textColor),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: textColor,
+                        ),
                   ),
                   Text(
                     openingString,
-                    style: TextStyle(fontSize: 16, color: textColor),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: textColor,
+                        ),
                   ),
                 ],
               ),
@@ -52,11 +58,15 @@ class OccupancyCardSchedule extends StatelessWidget {
                 children: [
                   Text(
                     "Closes",
-                    style: TextStyle(fontSize: 16, color: textColor),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: textColor,
+                        ),
                   ),
                   Text(
                     closingString,
-                    style: TextStyle(fontSize: 16, color: textColor),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: textColor,
+                        ),
                   ),
                 ],
               ),

@@ -4,7 +4,9 @@ import 'package:occupancy_frontend/constants.dart';
 import 'package:occupancy_frontend/core/functions/uk_datetime.dart';
 import 'package:occupancy_frontend/core/widgets/custom_progress_indicator.dart';
 import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_entity.dart';
+import 'package:occupancy_frontend/features/occupancy/presentation/screens/occupancy_details_screen.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/occupancy_card_schedule.dart';
+import 'package:occupancy_frontend/features/occupancy/presentation/widgets/timer.dart';
 
 class OccupancyCard extends ConsumerWidget {
   const OccupancyCard(
@@ -28,9 +30,11 @@ class OccupancyCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final borderRadius = BorderRadius.circular(30);
     final weekday = ukDateTimeNow().weekday - 1;
     final occupancyProvider = ref.watch(occupancyEntityProvider(dataName));
     Color textColor;
+
     if (cardColor != null && cardColor!.computeLuminance() < 0.5) {
       textColor = const Color(ConstantColors.lavenderBush);
     } else {
@@ -40,52 +44,76 @@ class OccupancyCard extends ConsumerWidget {
     return occupancyProvider.when(
       data: (data) {
         final int occupancy = data.data.last.$2;
+        final DateTime lastUpdated = data.data.last.$1;
         return Card(
           color: cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: SizedBox(
-            width: width,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SizedBox(
-                    width: progressHeight * 0.7,
-                    height: progressHeight * 0.7,
-                    child: CustomPaint(
-                      painter: CustomProgressIndicator(
-                          progress: (occupancy).toDouble() / 100,
-                          startAngle: -30,
+          shape: RoundedRectangleBorder(borderRadius: borderRadius),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return OccupancyDetailsScreen(
+                          displayName: displayName,
+                          dataName: dataName,
+                          mainColor: cardColor,
+                          textColor: textColor,
                           progressColor: progressColor,
-                          emptyColor: emptyColor),
-                      child: Center(
-                        child: Text(
-                          "$occupancy%",
-                          style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: textColor),
+                          emptyColor: emptyColor);
+                    },
+                  ),
+                );
+              },
+              borderRadius: borderRadius,
+              child: SizedBox(
+                width: width,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 25, horizontal: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      SizedBox(
+                        width: progressHeight * 0.7,
+                        height: progressHeight * 0.7,
+                        child: CustomPaint(
+                          painter: CustomProgressIndicator(
+                              progress: (occupancy).toDouble() / 100,
+                              startAngle: -30,
+                              progressColor: progressColor,
+                              emptyColor: emptyColor),
+                          child: Center(
+                            child: Text(
+                              "$occupancy%",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineLarge!
+                                  .copyWith(color: textColor),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      TimerWidget(
+                        dateTime: lastUpdated,
+                        textColor: textColor,
+                      ),
+                      Text(
+                        displayName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall!
+                            .copyWith(color: textColor),
+                      ),
+                      OccupancyCardSchedule(
+                          opening: data.scheduleEntity.timings[weekday].opening,
+                          closing: data.scheduleEntity.timings[weekday].closing,
+                          textColor: textColor,
+                          width: width)
+                    ],
                   ),
-                  Text(
-                    displayName,
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: textColor),
-                  ),
-                  OccupancyCardSchedule(
-                    opening: data.scheduleEntity.timings[weekday].opening, 
-                    closing: data.scheduleEntity.timings[weekday].closing,
-                    textColor: textColor, 
-                    width: width
-                  )
-                ],
+                ),
               ),
             ),
           ),
