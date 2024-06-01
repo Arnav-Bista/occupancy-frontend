@@ -10,9 +10,8 @@ class OccupancyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text("MyOccupancy"),
-        ),
+        centerTitle: true,
+        title: const Text("MyOccupancy"),
       ),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {

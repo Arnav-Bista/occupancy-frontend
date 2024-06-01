@@ -13,15 +13,17 @@ import 'package:occupancy_frontend/features/occupancy/presentation/widgets/refre
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/timer.dart';
 
 class OccupancyCard extends ConsumerWidget {
-  const OccupancyCard(
-      {super.key,
-      required this.displayName,
-      required this.dataName,
-      required this.width,
-      required this.progressHeight,
-      this.cardColor,
-      this.progressColor,
-      this.emptyColor});
+  const OccupancyCard({
+    super.key,
+    required this.displayName,
+    required this.dataName,
+    required this.width,
+    required this.progressHeight,
+    this.cardColor,
+    this.progressColor,
+    this.emptyColor,
+    this.disableTap = false,
+  });
 
   final String displayName;
   final String dataName;
@@ -31,6 +33,7 @@ class OccupancyCard extends ConsumerWidget {
   final double progressHeight;
   final Color? progressColor;
   final Color? emptyColor;
+  final bool disableTap;
 
   final Duration refreshDelay = const Duration(seconds: 2);
 
@@ -80,137 +83,140 @@ class OccupancyCard extends ConsumerWidget {
         status = Status.error;
       },
     );
-    return Stack(
-      alignment: Alignment.topRight,
-      children: [
-        Card(
-          color: cardColor,
-          shape: RoundedRectangleBorder(borderRadius: borderRadius),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: status == Status.success
-                  ? () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return OccupancyDetailsScreen(
-                              displayName: displayName,
-                              dataName: dataName,
-                              mainColor: cardColor,
-                              textColor: textColor,
+    return Hero(
+      tag: dataName,
+      child: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          Card(
+            color: cardColor,
+            shape: RoundedRectangleBorder(borderRadius: borderRadius),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: status == Status.success && disableTap == false
+                    ? () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return OccupancyDetailsScreen(
+                                displayName: displayName,
+                                dataName: dataName,
+                                mainColor: cardColor,
+                                textColor: textColor,
+                                progressColor: progressColor,
+                                emptyColor: emptyColor,
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    : null,
+                borderRadius: borderRadius,
+                child: SizedBox(
+                  width: width,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 25, horizontal: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        SizedBox(
+                          width: progressHeight * 0.7,
+                          height: progressHeight * 0.7,
+                          child: CustomPaint(
+                            painter: CustomProgressIndicator(
+                              progress: (occupancy ?? 0) / 100,
+                              startAngle: -30,
                               progressColor: progressColor,
                               emptyColor: emptyColor,
-                            );
-                          },
-                        ),
-                      );
-                    }
-                  : null,
-              borderRadius: borderRadius,
-              child: SizedBox(
-                width: width,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 25, horizontal: 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      SizedBox(
-                        width: progressHeight * 0.7,
-                        height: progressHeight * 0.7,
-                        child: CustomPaint(
-                          painter: CustomProgressIndicator(
-                            progress: (occupancy ?? 0) / 100,
-                            startAngle: -30,
-                            progressColor: progressColor,
-                            emptyColor: emptyColor,
-                          ),
-                          child: Center(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 500),
-                              child: switch (status) {
-                                Status.success => Text(
-                                    "${occupancy!}%",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineLarge!
-                                        .copyWith(color: textColor),
-                                  ),
-                                Status.loading => CustomShimmer(
-                                    height: occupancyNumberTextSize.height,
-                                    width: occupancyNumberTextSize.width,
-                                  ),
-                                Status.error => Text(
-                                    "?",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineLarge!
-                                        .copyWith(color: textColor),
-                                  ),
-                              },
+                            ),
+                            child: Center(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 500),
+                                child: switch (status) {
+                                  Status.success => Text(
+                                      "${occupancy!}%",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineLarge!
+                                          .copyWith(color: textColor),
+                                    ),
+                                  Status.loading => CustomShimmer(
+                                      height: occupancyNumberTextSize.height,
+                                      width: occupancyNumberTextSize.width,
+                                    ),
+                                  Status.error => Text(
+                                      "?",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineLarge!
+                                          .copyWith(color: textColor),
+                                    ),
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Transform.translate(
-                        offset: const Offset(0, -10),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 500),
-                          child: switch (status) {
-                            Status.success => TimerWidget(
-                                dateTime: lastUpdated!,
-                                textColor: textColor,
-                              ),
-                            Status.loading => Padding(
-                                // Size didnt match...
-                                padding: const EdgeInsets.all(1.3),
-                                child: CustomShimmer(
-                                  height: textSize.height,
-                                  width: textSize.width,
+                        Transform.translate(
+                          offset: const Offset(0, -10),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 500),
+                            child: switch (status) {
+                              Status.success => TimerWidget(
+                                  dateTime: lastUpdated!,
+                                  textColor: textColor,
                                 ),
-                              ),
-                            Status.error => Text(
-                                "Error: $errorCode",
-                                style:
-                                    TextStyle(fontSize: 14, color: textColor),
-                              )
-                          },
+                              Status.loading => Padding(
+                                  // Size didnt match...
+                                  padding: const EdgeInsets.all(1.3),
+                                  child: CustomShimmer(
+                                    height: textSize.height,
+                                    width: textSize.width,
+                                  ),
+                                ),
+                              Status.error => Text(
+                                  "Error: $errorCode",
+                                  style:
+                                      TextStyle(fontSize: 14, color: textColor),
+                                )
+                            },
+                          ),
                         ),
-                      ),
-                      Text(
-                        displayName,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall!
-                            .copyWith(color: textColor),
-                      ),
-                      OccupancyCardSchedule(
-                        opening: occupancyData
-                            ?.scheduleEntity.timings[weekday].opening,
-                        closing: occupancyData
-                            ?.scheduleEntity.timings[weekday].closing,
-                        textColor: textColor,
-                        width: width,
-                        status: status,
-                      )
-                    ],
+                        Text(
+                          displayName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall!
+                              .copyWith(color: textColor),
+                        ),
+                        OccupancyCardSchedule(
+                          opening: occupancyData
+                              ?.scheduleEntity.timings[weekday].opening,
+                          closing: occupancyData
+                              ?.scheduleEntity.timings[weekday].closing,
+                          textColor: textColor,
+                          width: width,
+                          status: status,
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 10, top: 10),
-          child: RefreshButton(
-            lastUpdated: lastUpdated,
-            dataName: dataName,
-            delay: refreshDelay,
-            color: textColor,
-          ),
-        )
-      ],
+          Padding(
+            padding: const EdgeInsets.only(right: 10, top: 10),
+            child: RefreshButton(
+              lastUpdated: lastUpdated,
+              dataName: dataName,
+              delay: refreshDelay,
+              color: textColor,
+            ),
+          )
+        ],
+      ),
     );
   }
 }

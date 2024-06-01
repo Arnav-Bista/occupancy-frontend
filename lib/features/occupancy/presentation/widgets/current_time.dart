@@ -32,7 +32,8 @@ class CurrentTimeTimer extends StatefulWidget {
   State<CurrentTimeTimer> createState() => _CurrentTimeTimerState();
 }
 
-class _CurrentTimeTimerState extends State<CurrentTimeTimer> {
+class _CurrentTimeTimerState extends State<CurrentTimeTimer>
+    with WidgetsBindingObserver {
   Timer? secondsTimer;
   Timer? minuteTimer;
 
@@ -59,14 +60,33 @@ class _CurrentTimeTimerState extends State<CurrentTimeTimer> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void setup() {
     final now = ukDateTimeNow();
     seconds = now.second;
     minutes = now.minute;
     hours = now.hour;
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+    setup();
     startTimer();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      setState(setup);
+    }
   }
 
   @override
