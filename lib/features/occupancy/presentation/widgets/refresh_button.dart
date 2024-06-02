@@ -5,12 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_entity.dart';
 
 class RefreshButton extends ConsumerStatefulWidget {
-  const RefreshButton(
-      {super.key,
-      this.delay,
-      this.color,
-      required this.dataName,
-      this.lastUpdated});
+  const RefreshButton({
+    super.key,
+    this.delay,
+    this.color,
+    required this.dataName,
+    this.lastUpdated,
+  });
   final Duration? delay;
   final Color? color;
   final String dataName;

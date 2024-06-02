@@ -41,7 +41,11 @@ class _OccupancyDetailsScreenState extends State<OccupancyDetailsScreen> {
     final size = MediaQuery.of(context).size;
     final List<Widget> widgetOptions = [
       Center(child: TodayDetails(widget: widget, size: size)),
-      Schedule(dataName: widget.dataName),
+      Schedule(
+        dataName: widget.dataName,
+        color: widget.mainColor,
+        textColor: widget.textColor,
+      ),
       Placeholder(),
     ];
 

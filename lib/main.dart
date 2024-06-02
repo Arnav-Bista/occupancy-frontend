@@ -23,16 +23,18 @@ class MyApp extends StatelessWidget {
           // brightness: Brightness.dark
         ),
         useMaterial3: true,
-        textTheme: GoogleFonts.latoTextTheme().copyWith(
-          headlineLarge: GoogleFonts.lato(
+        textTheme: GoogleFonts.latoTextTheme(
+          // ThemeData(brightness: Brightness.dark).textTheme,
+        ).copyWith(
+          headlineLarge: GoogleFonts.latoTextTheme().headlineLarge!.copyWith(
             fontSize: 40,
             fontWeight: FontWeight.bold,
           ),
-          headlineSmall: GoogleFonts.lato(
+          headlineSmall: GoogleFonts.latoTextTheme().headlineSmall!.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
-          bodyMedium: GoogleFonts.lato(
+          bodyMedium: GoogleFonts.latoTextTheme().bodyMedium!.copyWith(
             fontSize: 16,
           ),
         ),

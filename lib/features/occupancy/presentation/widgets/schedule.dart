@@ -5,9 +5,12 @@ import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_
 import 'package:occupancy_frontend/features/occupancy/domain/entities/timing_entity.dart';
 
 class Schedule extends ConsumerWidget {
-  const Schedule({super.key, required this.dataName});
+  const Schedule(
+      {super.key, required this.dataName, this.color, this.textColor});
 
   final String dataName;
+  final Color? color;
+  final Color? textColor;
 
   String getDayName(int day) {
     switch (day) {
@@ -33,14 +36,17 @@ class Schedule extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final occupancyProvider = ref.watch(occupancyEntityProvider(dataName));
-    final textSize = getTextSize("X", Theme.of(context).textTheme.bodyMedium!);
+    final textStyle =
+        Theme.of(context).textTheme.bodyMedium!.copyWith(color: textColor);
 
     late Widget childWidget;
     occupancyProvider.when(
       loading: () {
         childWidget = const Expanded(
-          child: Center(
-            child: CircularProgressIndicator(),
+          child: Expanded(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
         );
       },
@@ -57,124 +63,75 @@ class Schedule extends ConsumerWidget {
         List<Widget> opening = [];
         List<Widget> closing = [];
 
-        days.add(SizedBox(height: textSize.height));
-        opening.add(SizedBox(height: textSize.height));
-        closing.add(SizedBox(height: textSize.height));
-
         days.add(Text(
           "Day",
-          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: textStyle.copyWith(fontWeight: FontWeight.bold),
         ));
         opening.add(Text(
           "Opening",
-          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: textStyle.copyWith(fontWeight: FontWeight.bold),
         ));
         closing.add(Text(
           "Closing",
-          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: textStyle.copyWith(fontWeight: FontWeight.bold),
         ));
 
         for (Timing timing in data.scheduleEntity.timings) {
           days.add(Text(
             getDayName(++weekDay),
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: textStyle,
           ));
           opening.add(Text(
             (timing.opening ?? 0).toString(),
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: textStyle,
           ));
           closing.add(Text(
             (timing.closing ?? 0).toString(),
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: textStyle,
           ));
         }
 
-        days.add(SizedBox(height: textSize.height));
-        opening.add(SizedBox(height: textSize.height));
-        closing.add(SizedBox(height: textSize.height));
-
-        childWidget = Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: days,
+        childWidget = SizedBox(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              // vertical: 10,
+              horizontal: 20,
             ),
-            Column(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: opening,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: days,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: opening,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: closing,
+                ),
+              ],
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: closing,
-            ),
-          ],
+          ),
         );
-        // childWidget.add(Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Row(
-        //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //     children: [
-        //       Text(
-        //         "Day",
-        //         style: Theme.of(context).textTheme.bodyMedium,
-        //       ),
-        //       Text(
-        //         "Opening",
-        //         style: Theme.of(context).textTheme.bodyMedium,
-        //       ),
-        //       Text(
-        //         "Closing",
-        //         style: Theme.of(context).textTheme.bodyMedium,
-        //       ),
-        //     ],
-        //   ),
-        // ));
-        // childWidget.addAll(data.scheduleEntity.timings.map((timing) {
-        //   return Padding(
-        //     padding: const EdgeInsets.all(8.0),
-        //     child: Row(
-        //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //       children: [
-        //         Text(
-        //           getDayName(++weekDay),
-        //           style: Theme.of(context).textTheme.bodyMedium,
-        //         ),
-        //         Text(
-        //           (timing.opening ?? 0).toString(),
-        //           style: Theme.of(context).textTheme.bodyMedium,
-        //         ),
-        //         Text(
-        //           (timing.closing ?? 0).toString(),
-        //           style: Theme.of(context).textTheme.bodyMedium,
-        //         ),
-        //       ],
-        //     ),
-        //   );
-        // }));
-        // childWidget.add(Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Container(height: textSize.height),
-        // ));
       },
     );
 
     return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(child: childWidget),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 40),
+        child: Card(
+          color: color,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: childWidget,
+          ),
+        ),
       ),
     );
   }
