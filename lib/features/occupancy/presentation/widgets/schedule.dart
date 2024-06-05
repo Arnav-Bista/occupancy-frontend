@@ -33,6 +33,22 @@ class Schedule extends ConsumerWidget {
     }
   }
 
+  String getTimingString(int? time) {
+    if (time == null) {
+      return "-";
+    }
+    int hour = time ~/ 100;
+    int minute = time % 100;
+    return "$hour:${minute >= 10 ? minute : "0$minute"}";
+  }
+
+  Widget getRow(String day, String opening, String closing, double totalWidth, bool highlight) {
+    return Row(
+      children: [
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final occupancyProvider = ref.watch(occupancyEntityProvider(dataName));
@@ -82,57 +98,62 @@ class Schedule extends ConsumerWidget {
             style: textStyle,
           ));
           opening.add(Text(
-            (timing.opening ?? 0).toString(),
+            getTimingString(timing.opening),
             style: textStyle,
           ));
           closing.add(Text(
-            (timing.closing ?? 0).toString(),
+            getTimingString(timing.closing),
             style: textStyle,
           ));
         }
-
-        childWidget = SizedBox(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              // vertical: 10,
-              horizontal: 20,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: days,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: opening,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: closing,
-                ),
-              ],
-            ),
-          ),
+        childWidget = Column(
+          children: [],
         );
+        // childWidget = SizedBox(
+        //   child: Padding(
+        //     padding: const EdgeInsets.symmetric(
+        //       // vertical: 10,
+        //       horizontal: 20,
+        //     ),
+        //     child: Row(
+        //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //       children: [
+        //         Column(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //           children: days,
+        //         ),
+        //         Column(
+        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //           crossAxisAlignment: CrossAxisAlignment.end,
+        //           children: opening,
+        //         ),
+        //         Column(
+        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //           crossAxisAlignment: CrossAxisAlignment.end,
+        //           children: closing,
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // );
       },
     );
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 40),
-        child: Card(
-          color: color,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            child: childWidget,
+      child: LayoutBuilder(builder: (context, constraints) {
+        return SizedBox(
+          height: constraints.maxHeight * 0.7,
+          width: constraints.maxWidth * 0.8,
+          child: Card(
+            color: color,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: childWidget,
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

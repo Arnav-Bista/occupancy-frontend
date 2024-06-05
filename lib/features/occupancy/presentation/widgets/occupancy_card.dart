@@ -35,7 +35,7 @@ class OccupancyCard extends ConsumerWidget {
   final Color? emptyColor;
   final bool disableTap;
 
-  final Duration refreshDelay = const Duration(seconds: 2);
+  final Duration refreshDelay = const Duration(seconds: 10);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,7 +52,7 @@ class OccupancyCard extends ConsumerWidget {
 
     OccupancyEntity? occupancyData;
     int? occupancy;
-    DateTime? lastUpdated;
+    DateTime? lastFetched;
     int errorCode = 0;
     Size textSize = getTextSize(
         "XX minutes and XX seconds ago", const TextStyle(fontSize: 14));
@@ -64,13 +64,13 @@ class OccupancyCard extends ConsumerWidget {
       data: (data) {
         occupancyData = data;
         occupancy = data.data.last.$2;
-        lastUpdated = data.data.last.$1;
+        lastFetched = data.data.last.$1;
         status = Status.success;
       },
       loading: () {
         occupancyData = null;
         occupancy = null;
-        lastUpdated = null;
+        lastFetched = null;
         status = Status.loading;
       },
       error: (err, stack) {
@@ -164,7 +164,7 @@ class OccupancyCard extends ConsumerWidget {
                             duration: const Duration(milliseconds: 500),
                             child: switch (status) {
                               Status.success => TimerWidget(
-                                  dateTime: lastUpdated!,
+                                  dateTime: lastFetched!,
                                   textColor: textColor,
                                 ),
                               Status.loading => Padding(
@@ -209,7 +209,7 @@ class OccupancyCard extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(right: 10, top: 10),
             child: RefreshButton(
-              lastUpdated: lastUpdated,
+              lastFetched: lastFetched,
               dataName: dataName,
               delay: refreshDelay,
               color: textColor,

@@ -1,21 +1,23 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:occupancy_frontend/features/occupancy/domain/entities/last_updated_entity.dart';
 import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_entity.dart';
 
 class RefreshButton extends ConsumerStatefulWidget {
   const RefreshButton({
     super.key,
+    required this.dataName,
     this.delay,
     this.color,
-    required this.dataName,
-    this.lastUpdated,
+    this.lastFetched,
   });
   final Duration? delay;
   final Color? color;
   final String dataName;
-  final DateTime? lastUpdated;
+  final DateTime? lastFetched;
 
   @override
   ConsumerState<RefreshButton> createState() => _RefreshButtonState();
@@ -26,7 +28,8 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
   bool isEnabled = false;
 
   void refreshData() {
-    String from = widget.lastUpdated!.toIso8601String();
+    String from = widget.lastFetched!.toIso8601String();
+    ref.read(lastUpdatedProvider)[widget.dataName] = DateTime.now();
     ref
         .read(occupancyEntityProvider(widget.dataName).notifier)
         .refreshData(from);
@@ -41,22 +44,49 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
     super.dispose();
   }
 
+  void sendSnackBar(BuildContext context, int seconds) {
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text("Please wait $seconds second(s) before refreshing"),
+          duration: const Duration(milliseconds: 800),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Cancel previous timer!
     timer?.cancel();
-    final duration = widget.delay ?? const Duration(minutes: 1);
+    final lastUpdated = ref.read(lastUpdatedProvider)[widget.dataName];
+    final delay = widget.delay ?? const Duration(minutes: 1);
     int seconds = 0;
-    if (widget.lastUpdated != null) {
-      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        seconds += 1;
-        if (seconds == duration.inSeconds) {
-          setState(() {
-            isEnabled = true;
-          });
-          timer.cancel();
-        }
-      });
+    VoidCallback? onPressed;
+
+    if (lastUpdated == null) {
+      if (widget.lastFetched != null) {
+        onPressed = refreshData;
+        isEnabled = true;
+      }
+    } else {
+      Duration diff = DateTime.now().difference(lastUpdated);
+      if (diff > delay) {
+        isEnabled = true;
+        onPressed = refreshData;
+      } else {
+        seconds = delay.inSeconds - diff.inSeconds;
+        onPressed = () => sendSnackBar(context, seconds);
+        timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          seconds--;
+          if (seconds <= 0) {
+            timer.cancel();
+            setState(() {
+              isEnabled = true;
+            });
+          }
+        });
+      }
     }
 
     return IconButton(
@@ -64,17 +94,7 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
         Icons.refresh,
         color: isEnabled ? widget.color : widget.color!.withAlpha(128),
       ),
-      onPressed: isEnabled
-          ? refreshData
-          : () {
-              ScaffoldMessenger.of(context)
-                ..removeCurrentSnackBar()
-                ..showSnackBar(SnackBar(
-                    content: Text(
-                        "Please wait ${duration.inSeconds - seconds} second(s) before refreshing"),
-                    duration: const Duration(milliseconds: 800)));
-            },
-      // onPressed: lastUpdated == null ? null : refreshData,
+      onPressed: onPressed
     );
   }
 }
