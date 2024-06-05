@@ -42,13 +42,6 @@ class Schedule extends ConsumerWidget {
     return "$hour:${minute >= 10 ? minute : "0$minute"}";
   }
 
-  Widget getRow(String day, String opening, String closing, double totalWidth, bool highlight) {
-    return Row(
-      children: [
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final occupancyProvider = ref.watch(occupancyEntityProvider(dataName));
@@ -106,37 +99,35 @@ class Schedule extends ConsumerWidget {
             style: textStyle,
           ));
         }
-        childWidget = Column(
-          children: [],
+
+        childWidget = SizedBox(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              // vertical: 10,
+              horizontal: 20,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: days,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: opening,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: closing,
+                ),
+              ],
+            ),
+          ),
         );
-        // childWidget = SizedBox(
-        //   child: Padding(
-        //     padding: const EdgeInsets.symmetric(
-        //       // vertical: 10,
-        //       horizontal: 20,
-        //     ),
-        //     child: Row(
-        //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //       children: [
-        //         Column(
-        //           crossAxisAlignment: CrossAxisAlignment.start,
-        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //           children: days,
-        //         ),
-        //         Column(
-        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //           crossAxisAlignment: CrossAxisAlignment.end,
-        //           children: opening,
-        //         ),
-        //         Column(
-        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //           crossAxisAlignment: CrossAxisAlignment.end,
-        //           children: closing,
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        // );
       },
     );
 
