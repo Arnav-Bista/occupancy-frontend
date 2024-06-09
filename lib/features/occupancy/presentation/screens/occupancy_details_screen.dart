@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/occupancy_card.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/occupancy_graph.dart';
+import 'package:occupancy_frontend/features/occupancy/presentation/widgets/other_days.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/schedule.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/today_details.dart';
 
@@ -46,7 +47,7 @@ class _OccupancyDetailsScreenState extends State<OccupancyDetailsScreen> {
         color: widget.mainColor,
         textColor: widget.textColor,
       ),
-      Placeholder(),
+      OtherDays(dataName: widget.dataName)
     ];
 
     return Scaffold(

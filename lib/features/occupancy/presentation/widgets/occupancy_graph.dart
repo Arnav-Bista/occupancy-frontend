@@ -13,16 +13,25 @@ class OccupancyGraph extends ConsumerWidget {
     required this.width,
     required this.height,
     required this.dataName,
+    this.isOther = false,
     this.color,
   });
 
   final double width;
   final double height;
-  final String dataName;
   final Color? color;
+  final String dataName;
+  final bool isOther;
 
-  Widget getLineGraph(BuildContext context, OccupancyEntity data) {
-    final weekDay = DateTime.now().weekday - 1;
+  Widget getLineGraph(BuildContext context, OccupancyEntity data,
+      [DateTime? providedDate]) {
+    late DateTime date;
+    if (providedDate == null) {
+      date = ukDateTimeNow();
+    } else {
+      date = providedDate;
+    }
+    final weekDay = date.weekday - 1;
     final relevantTimings = data.scheduleEntity.timings[weekDay];
     if (!relevantTimings.isOpen) {
       return Center(
@@ -32,20 +41,19 @@ class OccupancyGraph extends ConsumerWidget {
         ),
       );
     }
-    final today = ukDateTimeNow();
     final startHour = relevantTimings.opening! ~/ 100;
     final startMinute = relevantTimings.opening! % 100;
     final startEpochs = DateTime(
-      today.year,
-      today.month,
-      today.day,
+      date.year,
+      date.month,
+      date.day,
       relevantTimings.opening! ~/ 100,
       relevantTimings.opening! % 100,
     ).millisecondsSinceEpoch;
     final endEpochs = DateTime(
-      today.year,
-      today.month,
-      today.day,
+      date.year,
+      date.month,
+      date.day,
       relevantTimings.closing! ~/ 100,
       relevantTimings.closing! % 100,
     ).millisecondsSinceEpoch;
@@ -116,15 +124,16 @@ class OccupancyGraph extends ConsumerWidget {
         ),
         lineBarsData: [
           LineChartBarData(
-              spots: data.data.map((e) {
-                final time = e.$1.millisecondsSinceEpoch;
-                return FlSpot(time.toDouble(), e.$2.toDouble());
-              }).toList(),
-              isCurved: false,
-              barWidth: 2,
-              isStrokeCapRound: true,
-              dotData: const FlDotData(show: false),
-              color: color),
+            spots: data.data.map((e) {
+              final time = e.$1.millisecondsSinceEpoch;
+              return FlSpot(time.toDouble(), e.$2.toDouble());
+            }).toList(),
+            isCurved: false,
+            barWidth: 2,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+            color: color,
+          ),
         ],
       ),
     );
@@ -132,7 +141,15 @@ class OccupancyGraph extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final occupancyProvider = ref.watch(occupancyEntityProvider(dataName));
+    late AsyncValue<OccupancyEntity> occupancyProvider;
+    if (isOther) {
+      occupancyProvider = ref.watch(otherDayOccupancyEntityProvider(dataName));
+    } else {
+      occupancyProvider = ref.watch(occupancyEntityProvider(dataName));
+    }
+    occupancyProvider.whenData((data) {
+      print(data.data);
+    });
     return SizedBox(
       width: width,
       height: height,
@@ -141,7 +158,18 @@ class OccupancyGraph extends ConsumerWidget {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 500),
           child: occupancyProvider.when(
-            data: (data) => getLineGraph(context, data),
+            data: (data) {
+              if (isOther) {
+                return getLineGraph(
+                    context,
+                    data,
+                    ref
+                        .read(
+                            otherDayOccupancyEntityProvider(dataName).notifier)
+                        .getCurrentDate());
+              }
+              return getLineGraph(context, data);
+            },
             loading: () {
               return CustomShimmer(
                 width: width,

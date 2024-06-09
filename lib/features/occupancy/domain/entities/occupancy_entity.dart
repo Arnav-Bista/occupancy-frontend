@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:either_dart/either.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:occupancy_frontend/core/functions/uk_datetime.dart';
 import 'package:occupancy_frontend/features/occupancy/data/data_sources/remote_source.dart';
 import 'package:occupancy_frontend/features/occupancy/domain/entities/schedule_entity.dart';
 
@@ -106,7 +109,59 @@ class OccupancyEntitiyNotifier
   }
 }
 
+class OtherDayOccupancyEntityNotifier
+    extends FamilyAsyncNotifier<OccupancyEntity, String> {
+  final HashMap map = HashMap<String, OccupancyEntity>();
+  final DateFormat formatter = DateFormat('yyyy-MM-dd');
+  late String _name;
+  late DateTime _currentDate;
+
+  @override
+  FutureOr<OccupancyEntity> build(String arg) async {
+    _name = arg;
+    final yesterdayDateTime = ukDateTimeNow().subtract(const Duration(days: 1));
+    _currentDate = yesterdayDateTime;
+    if (map.containsKey(yesterdayDateTime)) {
+      return map[yesterdayDateTime];
+    }
+    final String yesterday = formatter.format(yesterdayDateTime);
+    final data =
+        await ref.read(remoteSourceProvider).getOtherDayData(arg, yesterday);
+    return data.right;
+  }
+
+  Future<void> getOtherDayData(DateTime date) async {
+    _currentDate = date;
+    final String dateString = formatter.format(date);
+    state = const AsyncValue.loading();
+    if (map.containsKey(dateString)) {
+      state = AsyncValue.data(map[dateString]);
+      return;
+    }
+    final fetchedData =
+        await ref.read(remoteSourceProvider).getOtherDayData(_name, dateString);
+    if (fetchedData is Left) {
+      print(fetchedData.left);
+      print("Error :(");
+      state = AsyncValue.error(fetchedData.left, StackTrace.current);
+      return;
+    }
+    final data = fetchedData.right;
+    map[dateString] = data;
+    state = AsyncValue.data(data);
+  }
+
+  DateTime getCurrentDate() {
+    return _currentDate;
+  }
+}
+
 final occupancyEntityProvider = AsyncNotifierProvider.family<
     OccupancyEntitiyNotifier,
     OccupancyEntity,
     String>(OccupancyEntitiyNotifier.new);
+
+final otherDayOccupancyEntityProvider = AsyncNotifierProvider.family<
+    OtherDayOccupancyEntityNotifier,
+    OccupancyEntity,
+    String>(OtherDayOccupancyEntityNotifier.new);

@@ -4,13 +4,14 @@ import 'package:occupancy_frontend/core/functions/text_size.dart';
 import 'package:occupancy_frontend/core/widgets/custom_shimmer.dart';
 
 class OccupancyCardSchedule extends StatelessWidget {
-  const OccupancyCardSchedule(
-      {super.key,
-      required this.textColor,
-      required this.width,
-      required this.opening,
-      required this.closing,
-      required this.status});
+  const OccupancyCardSchedule({
+    super.key,
+    required this.textColor,
+    required this.width,
+    required this.opening,
+    required this.closing,
+    required this.status,
+  });
 
   final Color textColor;
   final double width;

@@ -22,6 +22,21 @@ class RemoteSource extends OccupancyRepository {
     final body = json.decode(response.body);
     return Right(OccupancyEntity.fromJson(body));
   }
+  
+  @override
+  Future<Either<int, OccupancyEntity>> getOtherDayData(
+      String name, String date) async {
+    print("FETCHING");
+    final uri =
+        Uri.https("myoccupancy.uk", "api/day", {"name": name, "date": date});
+    final response = await http.get(uri);
+    print("FETCHED");
+    if (response.statusCode != 200) {
+      return Left(response.statusCode);
+    }
+    final body = json.decode(response.body);
+    return Right(OccupancyEntity.fromJson(body));
+  }
 
   @override
   Future<Either<int, OccupancyEntity>> getFromData(
