@@ -6,8 +6,16 @@ import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/occupancy_graph.dart';
 
 class OtherDays extends StatelessWidget {
-  const OtherDays({super.key, required this.dataName});
+  const OtherDays({
+    super.key,
+    required this.dataName,
+    this.mainColor,
+    this.textColor,
+  });
+
   final String dataName;
+  final Color? mainColor;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +24,12 @@ class OtherDays extends StatelessWidget {
         builder: (context, constraints) => Column(
           children: [
             SizedBox(
-                height: constraints.maxHeight * 0.3,
-                child: MyDatePicker(dataName: dataName)),
+              height: constraints.maxHeight * 0.3,
+              child: MyDatePicker(dataName: dataName),
+            ),
             SizedBox(
               child: OccupancyGraph(
+                color: mainColor,
                 isOther: true,
                 dataName: dataName,
                 width: constraints.maxWidth * 0.8,
@@ -47,14 +57,57 @@ class MyDatePicker extends ConsumerStatefulWidget {
 class _MyDatePickerState extends ConsumerState<MyDatePicker> {
   DateTime ukNow = ukDateTimeNow();
   DateTime showingDate = ukDateTimeNow().subtract(const Duration(days: 1));
+
+  DateTime maxDate = ukDateTimeNow().subtract(const Duration(days: 1));
+  DateTime minDate = ukDateTimeNow().subtract(const Duration(days: 7 * 3));
+
+  void updateProvider() {
+    ref
+        .read(otherDayOccupancyEntityProvider(widget.dataName).notifier)
+        .getOtherDayData(showingDate);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text("Showing Data for:"),
-        Text(
-          widget.formatter.format(showingDate),
-          style: Theme.of(context).textTheme.headlineSmall,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.arrow_left_rounded,
+                size: 50,
+              ),
+              onPressed: showingDate.compareTo(minDate) >= 0
+                  ? () {
+                      setState(() {
+                        showingDate =
+                            showingDate.subtract(const Duration(days: 1));
+                      });
+                      updateProvider();
+                    }
+                  : null,
+            ),
+            Text(
+              widget.formatter.format(showingDate),
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.arrow_right_rounded,
+                size: 50,
+              ),
+              onPressed: showingDate.compareTo(maxDate) <= 0
+                  ? () {
+                      setState(() {
+                        showingDate = showingDate.add(const Duration(days: 1));
+                      });
+                      updateProvider();
+                    }
+                  : null,
+            )
+          ],
         ),
         ElevatedButton(
           onPressed: () {
@@ -65,20 +118,14 @@ class _MyDatePickerState extends ConsumerState<MyDatePicker> {
               lastDate: ukNow.subtract(const Duration(days: 1)),
             ).then((value) {
               if (value != null) {
-                ref
-                    .read(
-                      otherDayOccupancyEntityProvider(
-                        widget.dataName,
-                      ).notifier,
-                    )
-                    .getOtherDayData(value);
                 setState(() {
                   showingDate = value;
+                  updateProvider();
                 });
               }
             });
           },
-          child: const Text("Change Date"),
+          child: const Icon(Icons.edit_calendar),
         )
       ],
     );
