@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -133,6 +131,28 @@ class OccupancyGraph extends ConsumerWidget {
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
             color: color,
+          ),
+          LineChartBarData(
+            spots: data.knnPrediction.map((e) {
+              final time = e.$1.millisecondsSinceEpoch;
+              return FlSpot(time.toDouble(), e.$2.toDouble());
+            }).toList(),
+            isCurved: false,
+            barWidth: 2,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+            color: Colors.pink,
+          ),
+          LineChartBarData(
+            spots: data.lstmPrediction.map((e) {
+              final time = e.$1.millisecondsSinceEpoch;
+              return FlSpot(time.toDouble(), e.$2.toDouble());
+            }).toList(),
+            isCurved: false,
+            barWidth: 2,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+            color: Colors.purple,
           ),
         ],
       ),

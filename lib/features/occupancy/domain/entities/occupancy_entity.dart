@@ -11,19 +11,41 @@ import 'package:occupancy_frontend/features/occupancy/domain/entities/schedule_e
 
 @immutable
 class OccupancyEntity {
-  const OccupancyEntity({required this.data, required this.scheduleEntity});
+  const OccupancyEntity({
+    required this.data,
+    required this.knnPrediction,
+    required this.lstmPrediction,
+    required this.scheduleEntity,
+  });
 
   final List<(DateTime, int)> data;
+  final List<(DateTime, int)> knnPrediction;
+  final List<(DateTime, int)> lstmPrediction;
   final ScheduleEntity scheduleEntity;
 
   factory OccupancyEntity.fromJson(Map<String, dynamic> json) {
     final List<(DateTime, int)> data = [];
+    final List<(DateTime, int)> knnPrediction = [];
+    final List<(DateTime, int)> lstmPrediction = [];
     final dataList = json['data'] as List;
     for (final item in dataList) {
       data.add((DateTime.parse(item[0] as String), item[1] as int));
     }
+    final knnList = json['prediction_knn'] as List;
+    for (final item in knnList) {
+      knnPrediction.add((DateTime.parse(item[0] as String), item[1] as int));
+    }
+    final lstmList = json['prediction_knn'] as List;
+    for (final item in lstmList) {
+      lstmPrediction.add((DateTime.parse(item[0] as String), item[1] as int));
+    }
     final scheduleEntity = ScheduleEntity.fromJson(json);
-    return OccupancyEntity(data: data, scheduleEntity: scheduleEntity);
+    return OccupancyEntity(
+      data: data,
+      knnPrediction: knnPrediction,
+      lstmPrediction: lstmPrediction,
+      scheduleEntity: scheduleEntity,
+    );
   }
 
   DateTime? getLastDate() {
@@ -33,11 +55,18 @@ class OccupancyEntity {
     return data.last.$1;
   }
 
-  OccupancyEntity copyWith(
-      {List<(DateTime, int)>? data, ScheduleEntity? scheduleEntity}) {
+  OccupancyEntity copyWith({
+    List<(DateTime, int)>? data,
+    List<(DateTime, int)>? knnPrediction,
+    List<(DateTime, int)>? lstmPrediction,
+    ScheduleEntity? scheduleEntity,
+  }) {
     return OccupancyEntity(
-        data: data ?? this.data,
-        scheduleEntity: scheduleEntity ?? this.scheduleEntity);
+      data: data ?? this.data,
+      knnPrediction: knnPrediction ?? this.knnPrediction,
+      lstmPrediction: lstmPrediction ?? this.lstmPrediction,
+      scheduleEntity: scheduleEntity ?? this.scheduleEntity,
+    );
   }
 
   OccupancyEntity extendData(OccupancyEntity other) {
@@ -46,7 +75,10 @@ class OccupancyEntity {
       schedule = other.scheduleEntity;
     }
     return OccupancyEntity(
-        data: [...data, ...other.data], scheduleEntity: schedule);
+        data: [...data, ...other.data],
+        knnPrediction: knnPrediction,
+        lstmPrediction: lstmPrediction,
+        scheduleEntity: schedule);
   }
 
   @override

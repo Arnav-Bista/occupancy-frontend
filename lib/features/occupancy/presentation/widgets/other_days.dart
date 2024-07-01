@@ -58,7 +58,7 @@ class _MyDatePickerState extends ConsumerState<MyDatePicker> {
   DateTime ukNow = ukDateTimeNow();
   DateTime showingDate = ukDateTimeNow().subtract(const Duration(days: 1));
 
-  DateTime maxDate = ukDateTimeNow().subtract(const Duration(days: 1));
+  DateTime maxDate = ukDateTimeNow().add(const Duration(days: 7));
   DateTime minDate = ukDateTimeNow().subtract(const Duration(days: 7 * 3));
 
   void updateProvider() {
