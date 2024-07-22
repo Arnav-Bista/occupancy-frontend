@@ -35,7 +35,7 @@ class OccupancyEntity {
     for (final item in knnList) {
       knnPrediction.add((DateTime.parse(item[0] as String), item[1] as int));
     }
-    final lstmList = json['prediction_knn'] as List;
+    final lstmList = json['prediction_lstm'] as List;
     for (final item in lstmList) {
       lstmPrediction.add((DateTime.parse(item[0] as String), item[1] as int));
     }
