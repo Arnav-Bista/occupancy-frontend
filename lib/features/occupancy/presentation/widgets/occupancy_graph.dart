@@ -139,7 +139,7 @@ class OccupancyGraph extends ConsumerWidget {
               barWidth: 2,
               isStrokeCapRound: true,
               dotData: const FlDotData(show: false),
-              color: Colors.pink,
+              color: Colors.blue,
             ),
           if (models == Models.both || models == Models.lstm)
             LineChartBarData(
