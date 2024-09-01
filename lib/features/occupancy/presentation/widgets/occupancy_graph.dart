@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:occupancy_frontend/core/functions/uk_datetime.dart';
 import 'package:occupancy_frontend/core/widgets/custom_shimmer.dart';
+import 'package:occupancy_frontend/features/occupancy/domain/entities/models.dart';
 import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_entity.dart';
 
 class OccupancyGraph extends ConsumerWidget {
@@ -21,8 +22,7 @@ class OccupancyGraph extends ConsumerWidget {
   final String dataName;
   final bool isOther;
 
-  Widget getLineGraph(BuildContext context, OccupancyEntity data,
-      [DateTime? providedDate]) {
+  Widget getLineGraph(BuildContext context, OccupancyEntity data, Models models, [DateTime? providedDate]) {
     late DateTime date;
     if (providedDate == null) {
       date = ukDateTimeNow();
@@ -89,13 +89,10 @@ class OccupancyGraph extends ConsumerWidget {
                 }
                 // 0 Should be the opening time. Add the opening time
                 // This is in minutes
-                final timeDiff = (value - startEpochs) ~/ 60000 +
-                    startHour * 60 +
-                    startMinute;
+                final timeDiff = (value - startEpochs) ~/ 60000 + startHour * 60 + startMinute;
                 final hour = timeDiff ~/ 60;
                 final minute = timeDiff % 60;
-                final String time =
-                    "$hour:${minute < 10 ? "0$minute" : minute}";
+                final String time = "$hour:${minute < 10 ? "0$minute" : minute}";
                 return SideTitleWidget(
                   // angle: pi / 6,
                   axisSide: AxisSide.bottom,
@@ -132,28 +129,30 @@ class OccupancyGraph extends ConsumerWidget {
             dotData: const FlDotData(show: false),
             color: color,
           ),
-          LineChartBarData(
-            spots: data.knnPrediction.map((e) {
-              final time = e.$1.millisecondsSinceEpoch;
-              return FlSpot(time.toDouble(), e.$2.toDouble());
-            }).toList(),
-            isCurved: false,
-            barWidth: 2,
-            isStrokeCapRound: true,
-            dotData: const FlDotData(show: false),
-            color: Colors.pink,
-          ),
-          LineChartBarData(
-            spots: data.lstmPrediction.map((e) {
-              final time = e.$1.millisecondsSinceEpoch;
-              return FlSpot(time.toDouble(), e.$2.toDouble());
-            }).toList(),
-            isCurved: false,
-            barWidth: 2,
-            isStrokeCapRound: true,
-            dotData: const FlDotData(show: false),
-            color: Colors.purple,
-          ),
+          if (models == Models.both || models == Models.knn)
+            LineChartBarData(
+              spots: data.knnPrediction.map((e) {
+                final time = e.$1.millisecondsSinceEpoch;
+                return FlSpot(time.toDouble(), e.$2.toDouble());
+              }).toList(),
+              isCurved: false,
+              barWidth: 2,
+              isStrokeCapRound: true,
+              dotData: const FlDotData(show: false),
+              color: Colors.pink,
+            ),
+          if (models == Models.both || models == Models.lstm)
+            LineChartBarData(
+              spots: data.lstmPrediction.map((e) {
+                final time = e.$1.millisecondsSinceEpoch;
+                return FlSpot(time.toDouble(), e.$2.toDouble());
+              }).toList(),
+              isCurved: false,
+              barWidth: 2,
+              isStrokeCapRound: true,
+              dotData: const FlDotData(show: false),
+              color: Colors.purple,
+            ),
         ],
       ),
     );
@@ -167,9 +166,7 @@ class OccupancyGraph extends ConsumerWidget {
     } else {
       occupancyProvider = ref.watch(occupancyEntityProvider(dataName));
     }
-    occupancyProvider.whenData((data) {
-      print(data.data);
-    });
+    final model = ref.watch(modelsProvider);
     return SizedBox(
       width: width,
       height: height,
@@ -181,14 +178,13 @@ class OccupancyGraph extends ConsumerWidget {
             data: (data) {
               if (isOther) {
                 return getLineGraph(
-                    context,
-                    data,
-                    ref
-                        .read(
-                            otherDayOccupancyEntityProvider(dataName).notifier)
-                        .getCurrentDate());
+                  context,
+                  data,
+                  model,
+                  ref.read(otherDayOccupancyEntityProvider(dataName).notifier).getCurrentDate(),
+                );
               }
-              return getLineGraph(context, data);
+              return getLineGraph(context, data, model);
             },
             loading: () {
               return CustomShimmer(

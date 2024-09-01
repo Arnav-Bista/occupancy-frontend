@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:occupancy_frontend/features/occupancy/domain/entities/models.dart';
 
-class ModelSelector extends StatefulWidget {
+class ModelSelector extends ConsumerStatefulWidget {
   const ModelSelector({super.key});
 
   @override
-  State<ModelSelector> createState() => _ModelSelectorState();
+  ConsumerState<ModelSelector> createState() => _ModelSelectorState();
 }
 
-class _ModelSelectorState extends State<ModelSelector> {
-  Models currentModel = Models.both;
+class _ModelSelectorState extends ConsumerState<ModelSelector> {
+  late Models currentModel;
 
   void changeModelSelection(Models? model) {
     if (model == null) return;
     setState(() {
       currentModel = model;
+      ref.read(modelsProvider.notifier).state = model;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    currentModel = ref.read(modelsProvider);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

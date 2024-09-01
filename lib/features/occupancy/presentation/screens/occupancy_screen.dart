@@ -42,21 +42,21 @@ class OccupancyScreen extends StatelessWidget {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: "Other Libraries",
-          ),
-        ],
-        currentIndex: 0,
-        selectedItemColor: const Color(ConstantColors.burgundy),
-        onTap: null,
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   items: const [
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.fitness_center_rounded),
+      //       label: "Gym",
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.book),
+      //       label: "Main Library",
+      //     ),
+      //   ],
+      //   currentIndex: 0,
+      //   selectedItemColor: const Color(ConstantColors.burgundy),
+      //   onTap: null,
+      // ),
     );
   }
 }

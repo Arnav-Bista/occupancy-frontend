@@ -30,9 +30,7 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
   void refreshData() {
     String from = widget.lastFetched!.toIso8601String();
     ref.read(lastUpdatedProvider)[widget.dataName] = DateTime.now();
-    ref
-        .read(occupancyEntityProvider(widget.dataName).notifier)
-        .refreshData(from);
+    ref.read(occupancyEntityProvider(widget.dataName).notifier).refreshData(from);
     setState(() {
       isEnabled = false;
     });
@@ -90,11 +88,10 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
     }
 
     return IconButton(
-      icon: Icon(
-        Icons.refresh,
-        color: isEnabled ? widget.color : widget.color!.withAlpha(128),
-      ),
-      onPressed: onPressed
-    );
+        icon: Icon(
+          Icons.refresh,
+          color: isEnabled ? widget.color : widget.color!.withAlpha(128),
+        ),
+        onPressed: onPressed);
   }
 }

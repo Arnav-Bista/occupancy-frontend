@@ -48,6 +48,15 @@ class OccupancyEntity {
     );
   }
 
+  factory OccupancyEntity.empty() {
+    return OccupancyEntity(
+      data: [],
+      knnPrediction: [],
+      lstmPrediction: [],
+      scheduleEntity: ScheduleEntity.empty(),
+    );
+  }
+
   DateTime? getLastDate() {
     if (data.isEmpty) {
       return null;
@@ -71,7 +80,7 @@ class OccupancyEntity {
 
   OccupancyEntity extendData(OccupancyEntity other) {
     ScheduleEntity schedule = scheduleEntity;
-    if (scheduleEntity != other.scheduleEntity) {
+    if (scheduleEntity != other.scheduleEntity && other.scheduleEntity.timings.isNotEmpty) {
       schedule = other.scheduleEntity;
     }
     return OccupancyEntity(
@@ -80,6 +89,7 @@ class OccupancyEntity {
         lstmPrediction: lstmPrediction,
         scheduleEntity: schedule);
   }
+
 
   @override
   operator ==(Object other) {
@@ -102,15 +112,13 @@ class OccupancyEntity {
 
   @override
   int get hashCode {
-    final int dataHash = data.fold<int>(
-        0, (previousValue, element) => previousValue ^ element.hashCode);
+    final int dataHash = data.fold<int>(0, (previousValue, element) => previousValue ^ element.hashCode);
     final int scheduleHash = scheduleEntity.hashCode;
     return dataHash ^ scheduleHash;
   }
 }
 
-class OccupancyEntitiyNotifier
-    extends FamilyAsyncNotifier<OccupancyEntity, String> {
+class OccupancyEntitiyNotifier extends FamilyAsyncNotifier<OccupancyEntity, String> {
   late String _name;
 
   @override
@@ -123,11 +131,10 @@ class OccupancyEntitiyNotifier
   Future<void> refreshData(String from) async {
     state = const AsyncValue.loading();
     await Future.delayed(const Duration(seconds: 1));
-    final fetchedData =
-        await ref.read(remoteSourceProvider).getFromData(_name, from);
+    final fetchedData = await ref.read(remoteSourceProvider).getFromData(_name, from);
     if (fetchedData is Left) {
-      print(fetchedData.left);
-      print("Error :(");
+      // print(fetchedData.left);
+      // print("Error :(");
       state = AsyncValue.error(fetchedData.left, StackTrace.current);
       return;
     }
@@ -141,8 +148,7 @@ class OccupancyEntitiyNotifier
   }
 }
 
-class OtherDayOccupancyEntityNotifier
-    extends FamilyAsyncNotifier<OccupancyEntity, String> {
+class OtherDayOccupancyEntityNotifier extends FamilyAsyncNotifier<OccupancyEntity, String> {
   final HashMap map = HashMap<String, OccupancyEntity>();
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
   late String _name;
@@ -157,8 +163,7 @@ class OtherDayOccupancyEntityNotifier
       return map[yesterdayDateTime];
     }
     final String yesterday = formatter.format(yesterdayDateTime);
-    final data =
-        await ref.read(remoteSourceProvider).getOtherDayData(arg, yesterday);
+    final data = await ref.read(remoteSourceProvider).getOtherDayData(arg, yesterday);
     return data.right;
   }
 
@@ -170,11 +175,10 @@ class OtherDayOccupancyEntityNotifier
       state = AsyncValue.data(map[dateString]);
       return;
     }
-    final fetchedData =
-        await ref.read(remoteSourceProvider).getOtherDayData(_name, dateString);
+    final fetchedData = await ref.read(remoteSourceProvider).getOtherDayData(_name, dateString);
     if (fetchedData is Left) {
-      print(fetchedData.left);
-      print("Error :(");
+      // print(fetchedData.left);
+      // print("Error :(");
       state = AsyncValue.error(fetchedData.left, StackTrace.current);
       return;
     }
@@ -188,12 +192,9 @@ class OtherDayOccupancyEntityNotifier
   }
 }
 
-final occupancyEntityProvider = AsyncNotifierProvider.family<
-    OccupancyEntitiyNotifier,
-    OccupancyEntity,
-    String>(OccupancyEntitiyNotifier.new);
+final occupancyEntityProvider =
+    AsyncNotifierProvider.family<OccupancyEntitiyNotifier, OccupancyEntity, String>(OccupancyEntitiyNotifier.new);
 
-final otherDayOccupancyEntityProvider = AsyncNotifierProvider.family<
-    OtherDayOccupancyEntityNotifier,
-    OccupancyEntity,
-    String>(OtherDayOccupancyEntityNotifier.new);
+final otherDayOccupancyEntityProvider =
+    AsyncNotifierProvider.family<OtherDayOccupancyEntityNotifier, OccupancyEntity, String>(
+        OtherDayOccupancyEntityNotifier.new);

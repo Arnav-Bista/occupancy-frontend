@@ -54,10 +54,8 @@ class OccupancyCard extends ConsumerWidget {
     int? occupancy;
     DateTime? lastFetched;
     int errorCode = 0;
-    Size textSize = getTextSize(
-        "XX minutes and XX seconds ago", const TextStyle(fontSize: 14));
-    Size occupancyNumberTextSize =
-        getTextSize("100%", Theme.of(context).textTheme.headlineLarge!);
+    Size textSize = getTextSize("XX minutes and XX seconds ago", const TextStyle(fontSize: 14));
+    Size occupancyNumberTextSize = getTextSize("100%", Theme.of(context).textTheme.headlineLarge!);
     Status status = Status.loading;
 
     occupancyProvider.when(
@@ -77,7 +75,7 @@ class OccupancyCard extends ConsumerWidget {
         if (err is int) {
           errorCode = err;
         } else {
-          print(err);
+          // print(err);
           errorCode = 600;
         }
         status = Status.error;
@@ -116,8 +114,7 @@ class OccupancyCard extends ConsumerWidget {
                 child: SizedBox(
                   width: width,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 25, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 8),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
@@ -137,10 +134,7 @@ class OccupancyCard extends ConsumerWidget {
                                 child: switch (status) {
                                   Status.success => Text(
                                       "${occupancy!}%",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineLarge!
-                                          .copyWith(color: textColor),
+                                      style: Theme.of(context).textTheme.headlineLarge!.copyWith(color: textColor),
                                     ),
                                   Status.loading => CustomShimmer(
                                       height: occupancyNumberTextSize.height,
@@ -148,10 +142,7 @@ class OccupancyCard extends ConsumerWidget {
                                     ),
                                   Status.error => Text(
                                       "?",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineLarge!
-                                          .copyWith(color: textColor),
+                                      style: Theme.of(context).textTheme.headlineLarge!.copyWith(color: textColor),
                                     ),
                                 },
                               ),
@@ -177,24 +168,18 @@ class OccupancyCard extends ConsumerWidget {
                                 ),
                               Status.error => Text(
                                   "Error: $errorCode",
-                                  style:
-                                      TextStyle(fontSize: 14, color: textColor),
+                                  style: TextStyle(fontSize: 14, color: textColor),
                                 )
                             },
                           ),
                         ),
                         Text(
                           displayName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall!
-                              .copyWith(color: textColor),
+                          style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: textColor),
                         ),
                         OccupancyCardSchedule(
-                          opening: occupancyData
-                              ?.scheduleEntity.timings[weekday].opening,
-                          closing: occupancyData
-                              ?.scheduleEntity.timings[weekday].closing,
+                          opening: occupancyData?.scheduleEntity.timings[weekday].opening,
+                          closing: occupancyData?.scheduleEntity.timings[weekday].closing,
                           textColor: textColor,
                           width: width,
                           status: status,

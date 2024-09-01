@@ -7,9 +7,12 @@ class ScheduleEntity {
 
   factory ScheduleEntity.fromJson(Map<String, dynamic> json) {
     final timings = json['schedule']['timings'] as List;
-    final List<Timing> data =
-        timings.map((timing) => Timing.fromJson(timing)).toList();
+    final List<Timing> data = timings.map((timing) => Timing.fromJson(timing)).toList();
     return ScheduleEntity(timings: data);
+  }
+
+  factory ScheduleEntity.empty() {
+    return const ScheduleEntity(timings: []);
   }
 
   final List<Timing> timings;
@@ -35,7 +38,6 @@ class ScheduleEntity {
 
   @override
   int get hashCode {
-    return timings.fold<int>(
-        0, (previousValue, element) => previousValue ^ element.hashCode);
+    return timings.fold<int>(0, (previousValue, element) => previousValue ^ element.hashCode);
   }
 }

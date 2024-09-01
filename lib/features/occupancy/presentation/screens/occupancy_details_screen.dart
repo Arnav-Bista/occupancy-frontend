@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/other_days.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/schedule.dart';
@@ -70,14 +68,14 @@ class _OccupancyDetailsScreenState extends State<OccupancyDetailsScreen> {
         items: const [
           BottomNavigationBarItem(
             label: "Today",
-            icon: const Icon(Icons.today),
+            icon: Icon(Icons.today),
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.calendar_month),
+            icon: Icon(Icons.calendar_month),
             label: "Schedule",
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.data_exploration),
+            icon: Icon(Icons.data_exploration),
             label: "Other days",
           ),
         ],
