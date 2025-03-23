@@ -90,7 +90,6 @@ class OccupancyEntity {
         scheduleEntity: schedule);
   }
 
-
   @override
   operator ==(Object other) {
     if (other is OccupancyEntity) {
@@ -131,8 +130,8 @@ class OccupancyEntitiyNotifier extends FamilyAsyncNotifier<OccupancyEntity, Stri
   }
 
   Future<void> refreshData(String from) async {
+    print("Refreshing data");
     state = const AsyncValue.loading();
-    await Future.delayed(const Duration(seconds: 1));
     final fetchedData = await ref.read(remoteSourceProvider).getFromData(_name, from);
     if (fetchedData is Left) {
       // print(fetchedData.left);

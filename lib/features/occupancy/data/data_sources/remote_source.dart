@@ -44,6 +44,7 @@ class RemoteSource extends OccupancyRepository {
     print("Getting day from data for $name");
     final uri = Uri.https(apiHost, "api/from", {"name": name, "from": from});
     final response = await http.get(uri);
+    print(response.statusCode);
     if (response.statusCode < 200 || response.statusCode >= 300) {
       print(response);
       return Left(response.statusCode);

@@ -5,8 +5,7 @@ import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_
 import 'package:occupancy_frontend/features/occupancy/domain/entities/timing_entity.dart';
 
 class Schedule extends ConsumerWidget {
-  const Schedule(
-      {super.key, required this.dataName, this.color, this.textColor});
+  const Schedule({super.key, required this.dataName, this.color, this.textColor});
 
   final String dataName;
   final Color? color;
@@ -39,14 +38,12 @@ class Schedule extends ConsumerWidget {
     }
     int hour = time ~/ 100;
     int minute = time % 100;
-    return "$hour:${minute >= 10 ? minute : "0$minute"}";
+    return "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final occupancyProvider = ref.watch(occupancyEntityProvider(dataName));
-    final textStyle =
-        Theme.of(context).textTheme.bodyMedium!.copyWith(color: textColor);
 
     late Widget childWidget;
     occupancyProvider.when(
@@ -67,84 +64,64 @@ class Schedule extends ConsumerWidget {
         );
       },
       data: (data) {
-        int weekDay = 0;
-        List<Widget> days = [];
-        List<Widget> opening = [];
-        List<Widget> closing = [];
-
-        days.add(Text(
-          "Day",
-          style: textStyle.copyWith(fontWeight: FontWeight.bold),
-        ));
-        opening.add(Text(
-          "Opening",
-          style: textStyle.copyWith(fontWeight: FontWeight.bold),
-        ));
-        closing.add(Text(
-          "Closing",
-          style: textStyle.copyWith(fontWeight: FontWeight.bold),
-        ));
-
-        for (Timing timing in data.scheduleEntity.timings) {
-          days.add(Text(
-            getDayName(++weekDay),
-            style: textStyle,
-          ));
-          opening.add(Text(
-            getTimingString(timing.opening),
-            style: textStyle,
-          ));
-          closing.add(Text(
-            getTimingString(timing.closing),
-            style: textStyle,
+        final List<Widget> entries = [];
+        for (int i = 0; i < data.scheduleEntity.timings.length; i++) {
+          final Timing timing = data.scheduleEntity.timings[i];
+          entries.add(Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          getDayName(i + 1),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        Text(
+                          "${getTimingString(timing.opening)} - ${getTimingString(timing.closing)}",
+                          style:
+                              TextStyle(fontSize: 12, fontWeight: FontWeight.w300, color: Theme.of(context).hintColor),
+                        ),
+                      ],
+                    ),
+                    Card(
+                    elevation: 0,
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                        child: Text(
+                          timing.isOpen ? "Open" : "Closed",
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
           ));
         }
 
-        childWidget = SizedBox(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              // vertical: 10,
-              horizontal: 20,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: days,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: opening,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: closing,
-                ),
-              ],
-            ),
-          ),
+        childWidget = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: entries
         );
       },
     );
 
-    return Center(
-      child: LayoutBuilder(builder: (context, constraints) {
-        return SizedBox(
-          height: constraints.maxHeight * 0.7,
-          width: constraints.maxWidth * 0.8,
-          child: Card(
-            color: color,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              child: childWidget,
-            ),
-          ),
-        );
-      }),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          child: childWidget,
+        ),
+      ),
     );
   }
 }
