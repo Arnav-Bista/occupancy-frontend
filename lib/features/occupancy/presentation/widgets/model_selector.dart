@@ -44,7 +44,7 @@ class _ModelSelectorState extends ConsumerState<ModelSelector> {
                   Text("GB", style: TextStyle(fontWeight: FontWeight.bold)),
                   Text("Gradient Boosting Regression", style: TextStyle(fontSize: 12)),
                   Divider(),
-                  Text("Model trained on almost 2 years of data. Not as fine grained as KNN when the conditions are right, but you can count on it to give you a good estimate."),
+                  Text("Model trained on almost 2 years of data. Not as fine grained as KNN when the conditions are right, but you can count on it to give you a good estimate. This is unaffected by holidays."),
                 ],
               ),
             ),
