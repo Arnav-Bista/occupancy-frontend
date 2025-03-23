@@ -39,8 +39,6 @@ class OccupancyGraph extends ConsumerWidget {
         ),
       );
     }
-    final startHour = relevantTimings.opening! ~/ 100;
-    final startMinute = relevantTimings.opening! % 100;
     final startEpochs = DateTime(
       date.year,
       date.month,
@@ -57,6 +55,45 @@ class OccupancyGraph extends ConsumerWidget {
     ).millisecondsSinceEpoch;
     return LineChart(
       LineChartData(
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (_) => Theme.of(context).cardColor,
+            tooltipBorder: BorderSide(
+              color: Colors.black,
+              width: 1,
+            ),
+            getTooltipItems: (barData) => barData.map((barData) {
+              return LineTooltipItem(
+                "${barData.y.toInt()}%",
+                TextStyle(
+                  color: barData.bar.color,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            }).toList(),
+          ),
+          enabled: true,
+          getTouchedSpotIndicator: (barData, spotIndexes) {
+            return spotIndexes.map((spotIndex) {
+              return TouchedSpotIndicatorData(
+                FlLine(
+                  color: Colors.black,
+                  strokeWidth: 1,
+                ),
+                FlDotData(
+                  getDotPainter: (spot, percent, barData, index) {
+                    return FlDotCirclePainter(
+                      radius: 4,
+                      color: barData.color ?? Colors.black,
+                      strokeWidth: 1,
+                      strokeColor: Colors.black,
+                    );
+                  },
+                ),
+              );
+            }).toList();
+          },
+        ),
         minX: startEpochs.toDouble(),
         maxX: endEpochs.toDouble(),
         minY: 0,
@@ -71,6 +108,21 @@ class OccupancyGraph extends ConsumerWidget {
               showTitles: false,
             ),
           ),
+          bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+            showTitles: true,
+              maxIncluded: false,
+              minIncluded: false,
+            getTitlesWidget: (value, meta) {
+              final time = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+              final hour = time.hour;
+              final minute = time.minute;
+              return Text(
+                "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}",
+                style: Theme.of(context).textTheme.bodySmall,
+              );
+            },
+          )),
           rightTitles: AxisTitles(
             sideTitles: SideTitles(
                 showTitles: true,
@@ -78,31 +130,6 @@ class OccupancyGraph extends ConsumerWidget {
                 getTitlesWidget: (value, meta) {
                   return Container();
                 }),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              interval: (120 + 30) * 60 * 1000,
-              getTitlesWidget: (value, meta) {
-                if (value == meta.min || value == meta.max) {
-                  return Container();
-                }
-                // 0 Should be the opening time. Add the opening time
-                // This is in minutes
-                final timeDiff = (value - startEpochs) ~/ 60000 + startHour * 60 + startMinute;
-                final hour = timeDiff ~/ 60;
-                final minute = timeDiff % 60;
-                final String time = "$hour:${minute < 10 ? "0$minute" : minute}";
-                return SideTitleWidget(
-                  // angle: pi / 6,
-                  axisSide: AxisSide.bottom,
-                  child: Text(
-                    time,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                );
-              },
-            ),
           ),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -135,20 +162,24 @@ class OccupancyGraph extends ConsumerWidget {
                 final time = e.$1.millisecondsSinceEpoch;
                 return FlSpot(time.toDouble(), e.$2.toDouble());
               }).toList(),
-              isCurved: false,
-              barWidth: 2,
+              dashArray: [2, 3],
+              isCurved: true,
+              barWidth: 1.25,
               isStrokeCapRound: true,
               dotData: const FlDotData(show: false),
               color: Colors.blue,
             ),
-          if (models == Models.both || models == Models.lstm)
+          if (models == Models.both || models == Models.gb)
             LineChartBarData(
-              spots: data.lstmPrediction.map((e) {
+              spots: data.gbPrediction.where((e) {
+                return e.$1.millisecondsSinceEpoch >= startEpochs && e.$1.millisecondsSinceEpoch <= endEpochs;
+              }).map((e) {
                 final time = e.$1.millisecondsSinceEpoch;
                 return FlSpot(time.toDouble(), e.$2.toDouble());
               }).toList(),
-              isCurved: false,
-              barWidth: 2,
+              dashArray: [2, 3],
+              isCurved: true,
+              barWidth: 1.25,
               isStrokeCapRound: true,
               dotData: const FlDotData(show: false),
               color: Colors.purple,

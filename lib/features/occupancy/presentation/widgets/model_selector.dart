@@ -42,7 +42,7 @@ class _ModelSelectorState extends ConsumerState<ModelSelector> {
               child: PredictionModelEntry(name: "KNN", color: Colors.blue),
             ),
             DropdownMenuItem(
-              value: Models.lstm,
+              value: Models.gb,
               child: PredictionModelEntry(name: "LSTM", color: Colors.purple),
             ),
           ],

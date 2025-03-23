@@ -14,19 +14,19 @@ class OccupancyEntity {
   const OccupancyEntity({
     required this.data,
     required this.knnPrediction,
-    required this.lstmPrediction,
+    required this.gbPrediction,
     required this.scheduleEntity,
   });
 
   final List<(DateTime, int)> data;
   final List<(DateTime, int)> knnPrediction;
-  final List<(DateTime, int)> lstmPrediction;
+  final List<(DateTime, int)> gbPrediction;
   final ScheduleEntity scheduleEntity;
 
   factory OccupancyEntity.fromJson(Map<String, dynamic> json) {
     final List<(DateTime, int)> data = [];
     final List<(DateTime, int)> knnPrediction = [];
-    final List<(DateTime, int)> lstmPrediction = [];
+    final List<(DateTime, int)> gbPrediction = [];
     final dataList = json['data'] as List;
     for (final item in dataList) {
       data.add((DateTime.parse(item[0] as String), item[1] as int));
@@ -35,15 +35,15 @@ class OccupancyEntity {
     for (final item in knnList) {
       knnPrediction.add((DateTime.parse(item[0] as String), item[1] as int));
     }
-    final lstmList = json['prediction_lstm'] as List;
+    final lstmList = json['prediction_gb'] as List;
     for (final item in lstmList) {
-      lstmPrediction.add((DateTime.parse(item[0] as String), item[1] as int));
+      gbPrediction.add((DateTime.parse(item[0] as String), item[1] as int));
     }
     final scheduleEntity = ScheduleEntity.fromJson(json);
     return OccupancyEntity(
       data: data,
       knnPrediction: knnPrediction,
-      lstmPrediction: lstmPrediction,
+      gbPrediction: gbPrediction,
       scheduleEntity: scheduleEntity,
     );
   }
@@ -52,7 +52,7 @@ class OccupancyEntity {
     return OccupancyEntity(
       data: [],
       knnPrediction: [],
-      lstmPrediction: [],
+      gbPrediction: [],
       scheduleEntity: ScheduleEntity.empty(),
     );
   }
@@ -67,13 +67,13 @@ class OccupancyEntity {
   OccupancyEntity copyWith({
     List<(DateTime, int)>? data,
     List<(DateTime, int)>? knnPrediction,
-    List<(DateTime, int)>? lstmPrediction,
+    List<(DateTime, int)>? gbPrediction,
     ScheduleEntity? scheduleEntity,
   }) {
     return OccupancyEntity(
       data: data ?? this.data,
       knnPrediction: knnPrediction ?? this.knnPrediction,
-      lstmPrediction: lstmPrediction ?? this.lstmPrediction,
+      gbPrediction: gbPrediction ?? this.gbPrediction,
       scheduleEntity: scheduleEntity ?? this.scheduleEntity,
     );
   }
@@ -86,7 +86,7 @@ class OccupancyEntity {
     return OccupancyEntity(
         data: [...data, ...other.data],
         knnPrediction: knnPrediction,
-        lstmPrediction: lstmPrediction,
+        gbPrediction: gbPrediction,
         scheduleEntity: schedule);
   }
 
@@ -124,7 +124,9 @@ class OccupancyEntitiyNotifier extends FamilyAsyncNotifier<OccupancyEntity, Stri
   @override
   Future<OccupancyEntity> build(String arg) async {
     _name = arg;
+    print("BUild");
     final data = await ref.read(remoteSourceProvider).getDayData(arg);
+    print(data);
     return data.right;
   }
 
@@ -177,8 +179,8 @@ class OtherDayOccupancyEntityNotifier extends FamilyAsyncNotifier<OccupancyEntit
     }
     final fetchedData = await ref.read(remoteSourceProvider).getOtherDayData(_name, dateString);
     if (fetchedData is Left) {
-      // print(fetchedData.left);
-      // print("Error :(");
+      print(fetchedData.left);
+      print("Error :(");
       state = AsyncValue.error(fetchedData.left, StackTrace.current);
       return;
     }

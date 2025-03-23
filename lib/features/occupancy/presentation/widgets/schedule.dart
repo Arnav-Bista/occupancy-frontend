@@ -62,7 +62,7 @@ class Schedule extends ConsumerWidget {
       error: (error, stackTrace) {
         childWidget = Expanded(
           child: Center(
-            child: Text("Error: $error"),
+            child: Text("Error: ${error.toString()}"),
           ),
         );
       },

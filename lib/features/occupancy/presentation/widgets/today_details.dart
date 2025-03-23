@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_entity.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/screens/occupancy_details_screen.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/model_selector.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/occupancy_card.dart';
