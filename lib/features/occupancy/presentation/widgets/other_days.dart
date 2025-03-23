@@ -5,7 +5,7 @@ import 'package:occupancy_frontend/core/functions/uk_datetime.dart';
 import 'package:occupancy_frontend/features/occupancy/domain/entities/occupancy_entity.dart';
 import 'package:occupancy_frontend/features/occupancy/presentation/widgets/occupancy_graph.dart';
 
-class OtherDays extends StatelessWidget {
+class OtherDays extends ConsumerWidget {
   const OtherDays({
     super.key,
     required this.dataName,
@@ -18,15 +18,46 @@ class OtherDays extends StatelessWidget {
   final Color? textColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final occupancyData = ref.watch(otherDayOccupancyEntityProvider(dataName));
+
+    int counter = 0;
+    final totalGb = occupancyData.whenData((value) {
+      final gb = value.gbPrediction.where((e) {
+        if (e.$1.hour >= 8 && e.$1.hour <= 21) {
+          counter++;
+          return true;
+        } else {
+          return false;
+        }
+      }).fold<double>(0.0, (previousValue, element) => previousValue + element.$2);
+      return gb;
+    });
+
     return Center(
       child: LayoutBuilder(
         builder: (context, constraints) => Column(
           children: [
             SizedBox(
-              height: constraints.maxHeight * 0.3,
+              height: constraints.maxHeight * 0.22,
               child: MyDatePicker(dataName: dataName),
             ),
+            SizedBox(
+              height: constraints.maxHeight * 0.15,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildOccupancyCard(
+                      context,
+                      "Peak Occupancy",
+                      occupancyData.whenData(
+                          (value) => value.gbPrediction.map((e) => e.$2).reduce((a, b) => a > b ? a : b).toDouble())),
+                  _buildOccupancyCard(
+                      context, "Average Occupancy", totalGb.whenData((value) => counter > 0 ? value / counter : 0.0)),
+                ],
+              ),
+            ),
+            SizedBox(height: 40),
             SizedBox(
               child: OccupancyGraph(
                 color: mainColor,
@@ -35,6 +66,27 @@ class OtherDays extends StatelessWidget {
                 width: constraints.maxWidth * 0.8,
                 height: constraints.maxHeight * 0.4,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOccupancyCard(BuildContext context, String title, AsyncValue<double> occupancyValue) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            occupancyValue.when(
+              data: (value) => Text("${value.toStringAsFixed(1)}%", style: Theme.of(context).textTheme.headlineMedium),
+              loading: () => const CircularProgressIndicator(),
+              error: (_, __) => const Text('Error'),
             ),
           ],
         ),
@@ -62,9 +114,7 @@ class _MyDatePickerState extends ConsumerState<MyDatePicker> {
   DateTime minDate = ukDateTimeNow().subtract(const Duration(days: 7 * 3));
 
   void updateProvider() {
-    ref
-        .read(otherDayOccupancyEntityProvider(widget.dataName).notifier)
-        .getOtherDayData(showingDate);
+    ref.read(otherDayOccupancyEntityProvider(widget.dataName).notifier).getOtherDayData(showingDate);
   }
 
   @override
@@ -82,8 +132,7 @@ class _MyDatePickerState extends ConsumerState<MyDatePicker> {
               onPressed: showingDate.compareTo(minDate) >= 0
                   ? () {
                       setState(() {
-                        showingDate =
-                            showingDate.subtract(const Duration(days: 1));
+                        showingDate = showingDate.subtract(const Duration(days: 1));
                       });
                       updateProvider();
                     }
